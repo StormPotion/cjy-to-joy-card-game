@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后宮翻牌子</title>
+    <style>
+        /* 全局設定 */
+        body {
+            background-color: #1a1a1a;
+            color: #d4af37;
+            font-family: "Microsoft JhengHei", "Microsoft JhengHei UI", "Heiti TC", "sans-serif";
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 { 
+            font-size: 28px; 
+            margin-bottom: 10px; 
+            text-shadow: 0 0 5px #d4af37;
+            font-weight: bold;
+        }
+        .subtitle { color: #f1c40f; margin-bottom: 30px; letter-spacing: 2px; }
+
+        /* 綠頭牌容器 */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        /* 綠頭牌樣式 */
+        .card {
+            aspect-ratio: 1 / 2.5; 
+            background: linear-gradient(to bottom, #2d5a27 0%, #2d5a27 20%, #fdfcf0 20%, #fdfcf0 100%);
+            border: 2px solid #a88d57;
+            border-radius: 8px 8px 4px 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 20px; 
+            writing-mode: vertical-rl; 
+            text-orientation: upright;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            padding-top: 20px;
+        }
+
+        .card.selected {
+            border: 3px solid #ff4757;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #ff4757;
+        }
+
+        button {
+            margin-top: 40px;
+            padding: 12px 40px;
+            background-color: #800000;
+            color: white;
+            border: 2px solid #d4af37;
+            border-radius: 50px;
+            font-size: 20px;
+            font-family: "Microsoft JhengHei", sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        #result-screen { display: none; width: 100%; max-width: 400px; }
+
+        .result-item {
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #d4af37;
+        }
+
+        .result-img { 
+            width: 100%; 
+            border-radius: 5px;
+            border: 2px solid #d4af37; 
+            margin-bottom: 10px;
+            min-height: 200px;
+            background: #333;
+            object-fit: cover;
+        }
+
+        .quote-text {
+            font-size: 20px;
+            color: #fff;
+            margin-top: 10px;
+            line-height: 1.4;
+            font-weight: normal;
+        }
+
+        .special-quote {
+            color: #ff4757;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-screen">
+        <h1 id="main-title">娘娘今夜欲與誰相伴？</h1>
+        <p class="subtitle">（請點選綠頭牌，可複選）</p>
+        
+        <div class="card-container" id="deck"></div>
+
+        <button onclick="confirmSelection()">傳召</button>
+    </div>
+
+    <div id="result-screen">
+        <h1 id="result-title"></h1>
+        <div id="photo-area"></div>
+        <button onclick="resetGame()">娘娘不滿意？重新選擇</button>
+    </div>
+
+    <script>
+        const characters = [
+            { name: "劉宇寧", img: "https://img1.pixhost.to/images/11459/681571168_271915.jpg", quote: "是魔羯的魅力讓妳想起了我嗎？" },
+            { name: "BTS", img: "https://img1.pixhost.to/images/11459/681571156_bts.png", quote: "果然娘娘是吃素的！Borahae！" },
+            { name: "里維兵長", img: "https://img1.pixhost.to/images/11459/681571164_levi.jpg", quote: "喂喂！給我把房間掃乾淨了！髒死了！" },
+            { name: "仁富", img: "https://img1.pixhost.to/images/11459/681571163_.png", quote: "日有所思，夜有所夢。正是魂牽夢縈之人！" },
+            { name: "華妃", img: "https://img1.pixhost.to/images/11459/681571159__.png", quote: "我不想再從天黑等到天亮了... 皇上終於想起世蘭了嗎？" },
+            { name: "甄嬛", img: "https://img1.pixhost.to/images/11459/681575097_595549097302163818.png", quote: "以色事他人 能得幾時好" }
+        ];
+
+        let selected = [];
+
+        function renderDeck() {
+            const deck = document.getElementById('deck');
+            deck.innerHTML = '';
+            characters.forEach((char, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<span>${char.name}</span>`; 
+                card.onclick = () => toggleSelect(index, card);
+                deck.appendChild(card);
+            });
+        }
+
+        function toggleSelect(index, el) {
+            if (selected.includes(index)) {
+                selected = selected.filter(i => i !== index);
+                el.classList.remove('selected');
+            } else {
+                selected.push(index);
+                el.classList.add('selected');
+            }
+            const title = document.getElementById('main-title');
+            if (selected.length > 1) {
+                title.innerText = "娘娘好福氣，今夜竟要雨露均霑！";
+                title.style.color = "#ff4757";
+            } else {
+                title.innerText = "娘娘今夜欲與誰相伴？";
+                title.style.color = "#d4af37";
+            }
+        }
+
+        function confirmSelection() {
+            if (selected.length === 0) return alert("娘娘，請至少翻一塊牌子吧！");
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+            const photoArea = document.getElementById('photo-area');
+            const resultTitle = document.getElementById('result-title');
+            photoArea.innerHTML = '';
+            if (selected.length > 1) {
+                resultTitle.innerText = "今夜大被同眠，好生熱鬧！";
+            } else {
+                resultTitle.innerText = "娘娘選得極好！";
+            }
+            selected.forEach(idx => {
+                const char = characters[idx];
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                let quoteClass = 'quote-text';
+                if (char.name === '仁富') quoteClass += ' special-quote';
+                item.innerHTML = `<img src="${char.img}" class="result-img" alt="${char.name}"><div class="${quoteClass}">${char.name}：${char.quote}</div>`;
+                photoArea.appendChild(item);
+            });
+            window.scrollTo(0,0);
+        }
+
+        function resetGame() {
+            selected = [];
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('main-title').innerText = "娘娘今夜欲與誰相伴？";
+            document.getElementById('main-title').style.color = "#d4af37";
+            renderDeck();
+        }
+
+        renderDeck();
+    </script>
+</body>
+</html>
