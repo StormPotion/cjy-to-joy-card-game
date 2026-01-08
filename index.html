@@ -2,88 +2,213 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>后宮翻牌子</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>佳音娘娘請翻牌</title>
+    
+    <link rel="icon" href="https://img1.pixhost.to/images/11459/681571163_.png">
+
     <style>
+        /* ==================== */
+        /* CSS 區塊       */
+        /* ==================== */
+        
         /* 全局設定 */
         body {
             background-color: #1a1a1a;
             color: #d4af37;
-            font-family: "Microsoft JhengHei", "Microsoft JhengHei UI", "Heiti TC", "sans-serif";
+            font-family: "Microsoft JhengHei", "Microsoft JhengHei UI", "Heiti TC", sans-serif;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- 第一畫面：遊戲主區 --- */
+        #game-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh; 
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            text-align: center;
-            min-height: 100vh;
-            margin: 0;
+            overflow: hidden;
+            padding: 10px 0 30px 0;
+            box-sizing: border-box;
+            background-color: #1a1a1a;
+            z-index: 10;
         }
 
-        h1 { 
-            font-size: 28px; 
-            margin-bottom: 10px; 
-            text-shadow: 0 0 5px #d4af37;
+        #game-screen-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        header {
+            text-align: center;
+            flex-shrink: 0;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 32px; 
+            margin: 0 0 8px 0;
+            text-shadow: none;
+            font-weight: bold;
+            padding: 0 10px;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            color: #f1c40f;
+            font-size: 20px; 
+            margin: 0;
+            opacity: 0.9;
             font-weight: bold;
         }
-        .subtitle { color: #f1c40f; margin-bottom: 30px; letter-spacing: 2px; }
 
         /* 綠頭牌容器 */
         .card-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            width: 100%;
-            max-width: 380px;
+            gap: 12px;
+            width: 90%;
+            max-width: 400px;
+            margin: 5px 0;
+            align-content: center;
+            flex-grow: 1;
+            /* 移除這裡的 perspective，改設在 card 上 */
         }
 
-        /* 綠頭牌樣式 */
+        /* --- 卡片翻轉特效 (原地翻轉版) --- */
         .card {
-            aspect-ratio: 1 / 2.5; 
-            background: linear-gradient(to bottom, #2d5a27 0%, #2d5a27 20%, #fdfcf0 20%, #fdfcf0 100%);
-            border: 2px solid #a88d57;
-            border-radius: 8px 8px 4px 4px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #000;
-            font-weight: bold;
-            font-size: 20px; 
-            writing-mode: vertical-rl; 
-            text-orientation: upright;
-            transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
+            aspect-ratio: 1 / 2.6;
+            background-color: transparent;
+            cursor: pointer;
+            perspective: 1000px; /* 視角設在卡片自己身上 */
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 8px;
+        }
+
+        .card.selected .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            box-sizing: border-box; 
+        }
+
+        /* 正面樣式 */
+        .card-front {
+            background: linear-gradient(to bottom, #2d5a27 0%, #2d5a27 15%, #fdfcf0 15%, #fdfcf0 100%);
+            border: 3px solid #a88d57;
             box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-            padding-top: 20px;
         }
 
-        .card.selected {
+        /* 背面樣式 */
+        .card-back {
+            background: linear-gradient(to bottom, #800000 0%, #800000 15%, #ffe6e6 15%, #ffe6e6 100%);
             border: 3px solid #ff4757;
-            transform: scale(1.05);
-            box-shadow: 0 0 15px #ff4757;
+            transform: rotateY(180deg);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.6);
         }
 
-        button {
-            margin-top: 40px;
-            padding: 12px 40px;
+        /* 直排文字 */
+        .vtext {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            color: #000;
+            line-height: 1.2;
+            pointer-events: none;
+        }
+
+        .vtext span {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* 按鈕區 */
+        .confirm-btn {
             background-color: #800000;
             color: white;
             border: 2px solid #d4af37;
+            width: 80%;
+            max-width: 300px;
+            padding: 15px 0;
             border-radius: 50px;
             font-size: 20px;
-            font-family: "Microsoft JhengHei", sans-serif;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: all 0.2s;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+            z-index: 100;
         }
 
-        button:active { transform: scale(0.95); }
+        .confirm-btn:active { transform: scale(0.95); }
 
-        #result-screen { display: none; width: 100%; max-width: 400px; }
+        /* --- 第二畫面：結果區 --- */
+        #result-screen {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px 0;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            background-color: #1a1a1a;
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #result-title {
+            margin-bottom: 25px;
+            font-size: 26px;
+            color: #f1c40f;
+            text-align: center;
+            padding: 0 20px;
+            line-height: 1.5;
+            text-shadow: none;
+        }
+
+        #photo-area {
+            width: 90%;
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
 
         .result-item {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             animation: fadeIn 0.8s;
             background: rgba(255, 255, 255, 0.05);
             padding: 15px;
@@ -91,29 +216,64 @@
             border: 1px solid #d4af37;
         }
 
-        .result-img { 
-            width: 100%; 
+        .result-img {
+            width: 100%;
             border-radius: 5px;
-            border: 2px solid #d4af37; 
-            margin-bottom: 10px;
-            min-height: 200px;
+            border: 2px solid #d4af37;
+            margin-bottom: 12px;
             background: #333;
+            min-height: 200px;
             object-fit: cover;
+            display: block;
         }
 
         .quote-text {
             font-size: 20px;
-            color: #fff;
-            margin-top: 10px;
-            line-height: 1.4;
-            font-weight: normal;
+            color: #ffffff; 
+            margin-top: 8px;
+            line-height: 1.5;
+            font-weight: bold;
+            text-align: justify;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        .special-quote {
-            color: #ff4757;
-            font-size: 24px;
-            font-weight: bold;
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 50px;
+            width: 100%;
+            align-items: center;
+            padding-bottom: 30px;
         }
+
+        .reset-btn, .exit-btn {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            padding: 14px 0;
+            text-align: center;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-decoration: none;
+        }
+
+        .reset-btn {
+            background-color: #800000;
+            color: white;
+            border: 2px solid #d4af37;
+        }
+
+        .exit-btn {
+            background-color: #d4af37;
+            color: #1a1a1a;
+            border: 2px solid #f1c40f;
+        }
+
+        .reset-btn:active, .exit-btn:active { transform: scale(0.95); }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -123,29 +283,38 @@
 </head>
 <body>
 
-    <div id="game-screen">
-        <h1 id="main-title">娘娘今夜欲與誰相伴？</h1>
-        <p class="subtitle">（請點選綠頭牌，可複選）</p>
-        
-        <div class="card-container" id="deck"></div>
+    <div id="game-wrapper">
+        <div id="game-screen-inner">
+            <header>
+                <h1 id="main-title">娘娘今夜欲與誰相伴？</h1>
+                <p class="subtitle" id="subtitle">（請娘娘翻牌，已選擇 0 人）</p>
+            </header>
 
-        <button onclick="confirmSelection()">傳召</button>
+            <div class="card-container" id="deck"></div>
+
+            <button onclick="confirmSelection()" class="confirm-btn">傳召</button>
+        </div>
     </div>
 
     <div id="result-screen">
         <h1 id="result-title"></h1>
         <div id="photo-area"></div>
-        <button onclick="resetGame()">娘娘不滿意？重新選擇</button>
+
+        <div class="button-group">
+            <button class="reset-btn" onclick="resetGame()">娘娘不滿意？重新選擇</button>
+            <a href="https://cjytoxiaxia.my.canva.site/hijoy" class="exit-btn">本宮乏了，先歇歇吧！</a>
+        </div>
     </div>
 
     <script>
+        // 資料區
         const characters = [
-            { name: "劉宇寧", img: "https://img1.pixhost.to/images/11459/681571168_271915.jpg", quote: "是魔羯的魅力讓妳想起了我嗎？" },
-            { name: "BTS", img: "https://img1.pixhost.to/images/11459/681571156_bts.png", quote: "果然娘娘是吃素的！Borahae！" },
-            { name: "里維兵長", img: "https://img1.pixhost.to/images/11459/681571164_levi.jpg", quote: "喂喂！給我把房間掃乾淨了！髒死了！" },
-            { name: "仁富", img: "https://img1.pixhost.to/images/11459/681571163_.png", quote: "日有所思，夜有所夢。正是魂牽夢縈之人！" },
-            { name: "華妃", img: "https://img1.pixhost.to/images/11459/681571159__.png", quote: "我不想再從天黑等到天亮了... 皇上終於想起世蘭了嗎？" },
-            { name: "甄嬛", img: "https://img1.pixhost.to/images/11459/681575097_595549097302163818.png", quote: "以色事他人 能得幾時好" }
+            { name: "劉宇寧", img: "https://img1.pixhost.to/images/11483/682524022_.jpg", quote: "是魔羯的魅力讓妳想起了我嗎？" },
+            { name: "BTS", img: "https://img1.pixhost.to/images/11483/682524019_bts.jpg", quote: "果然娘娘是吃素的！Borahae！" },
+            { name: "里維兵長", img: "https://img1.pixhost.to/images/11483/682524020_levi.jpg", quote: "喂喂！給我把房間掃乾淨了！髒死了！" },
+            { name: "仁富", img: "https://img1.pixhost.to/images/11483/682524014_.jpg", quote: "日有所思，夜有所夢。正是魂牽夢縈之人！" },
+            { name: "華妃", img: "https://img1.pixhost.to/images/11483/682524016__.jpg", quote: "我不想再從天黑等到天亮了... 您終於想起世蘭了嗎？" },
+            { name: "甄嬛", img: "https://img1.pixhost.to/images/11483/682524017__.jpg", quote: "以色事他人 能得幾時好" }
         ];
 
         let selected = [];
@@ -153,10 +322,24 @@
         function renderDeck() {
             const deck = document.getElementById('deck');
             deck.innerHTML = '';
+            
             characters.forEach((char, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.innerHTML = `<span>${char.name}</span>`; 
+                
+                const nameHtml = `<div class="vtext">${char.name.split('').map(ch => `<span>${ch}</span>`).join('')}</div>`;
+                
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            ${nameHtml}
+                        </div>
+                        <div class="card-back">
+                            ${nameHtml}
+                        </div>
+                    </div>
+                `;
+                
                 card.onclick = () => toggleSelect(index, card);
                 deck.appendChild(card);
             });
@@ -170,8 +353,25 @@
                 selected.push(index);
                 el.classList.add('selected');
             }
+            updateTitle();
+        }
+
+        function updateTitle() {
             const title = document.getElementById('main-title');
-            if (selected.length > 1) {
+            const subtitle = document.getElementById('subtitle');
+
+            let totalPeople = 0;
+            selected.forEach(idx => {
+                if (characters[idx].name === "BTS") totalPeople += 7;
+                else totalPeople += 1;
+            });
+
+            subtitle.innerText = `（請娘娘翻牌，娘娘已選擇 ${totalPeople} 人）`;
+
+            if (selected.length === characters.length) {
+                title.innerText = "小孩子才做選擇，我全都要！";
+                title.style.color = "#ff4757"; 
+            } else if (selected.length > 1) {
                 title.innerText = "娘娘好福氣，今夜竟要雨露均霑！";
                 title.style.color = "#ff4757";
             } else {
@@ -181,37 +381,174 @@
         }
 
         function confirmSelection() {
-            if (selected.length === 0) return alert("娘娘，請至少翻一塊牌子吧！");
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'block';
+            if (selected.length === 0) return alert("娘娘真是清心寡慾，請至少翻一塊牌子吧！");
+            
+            document.getElementById('game-wrapper').style.display = 'none';
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.style.display = 'flex';
+
             const photoArea = document.getElementById('photo-area');
             const resultTitle = document.getElementById('result-title');
             photoArea.innerHTML = '';
-            if (selected.length > 1) {
-                resultTitle.innerText = "今夜大被同眠，好生熱鬧！";
-            } else {
-                resultTitle.innerText = "娘娘選得極好！";
+            
+            const quoteClass = 'quote-text';
+
+            // 複製資料
+            let finalChars = selected.map(idx => ({...characters[idx]}));
+            let selectedNames = finalChars.map(c => c.name);
+
+            // --- 梗圖邏輯 ---
+
+            // 1. 全男班
+            if (selectedNames.includes("劉宇寧") && selectedNames.includes("BTS") && selectedNames.includes("里維兵長") && selectedNames.includes("仁富") && selected.length === 4) {
+                resultTitle.innerText = "今夜陽氣未免重了些";
+                
+                let c_liuyuning = finalChars.find(c => c.name === "劉宇寧");
+                let c_bts = finalChars.find(c => c.name === "BTS");
+                let c_renfu = finalChars.find(c => c.name === "仁富");
+                let c_levi = finalChars.find(c => c.name === "里維兵長");
+
+                c_bts.quote = "안녕하세요, 방탄소년단입니다!";
+                c_liuyuning.quote = "大家好，我是演員劉宇寧。既然大家都在，那我給大家唱首歌吧？";
+                c_renfu.quote = "（專業的夢中微笑）";
+                c_levi.quote = "嘖！吵死了！";
+
+                finalChars = [c_liuyuning, c_bts, c_renfu, c_levi];
             }
-            selected.forEach(idx => {
-                const char = characters[idx];
+
+            // 2. 身高差
+            else if (selectedNames.includes("劉宇寧") && selectedNames.includes("里維兵長") && selected.length === 2) {
+                resultTitle.innerText = "上面的空氣比較新鮮嗎？";
+                finalChars.find(c => c.name === "劉宇寧").quote = "兵長，天花板的灰塵還是交給我吧。（微笑俯視）";
+                finalChars.find(c => c.name === "里維兵長").quote = "嘖！（殺人的眼神拔刀）";
+            }
+
+            // 3. BTS + 華妃
+            else if (selectedNames.includes("BTS") && selectedNames.includes("華妃") && selected.length === 2) {
+                resultTitle.innerText = "本宮頭好痛，這是什麼妖魔鬼怪？";
+                let c_bts = finalChars.find(c => c.name === "BTS");
+                let c_huafei = finalChars.find(c => c.name === "華妃");
+                c_bts.quote = '娘娘！This is "Dynamite"！要不要一起跳舞？Light it up like dynamite！';
+                c_huafei.quote = "放肆！成何體統！穢亂後宮！給本宮拖出去！";
+                finalChars = [c_bts, c_huafei];
+            }
+
+            // 4. 里維 + 華妃
+            else if (selectedNames.includes("里維兵長") && selectedNames.includes("華妃") && selected.length === 2) {
+                resultTitle.innerText = "殺人的眼神";
+                let c_huafei = finalChars.find(c => c.name === "華妃");
+                let c_levi = finalChars.find(c => c.name === "里維兵長");
+                c_huafei.quote = "誰啊？竟然嫌本宮髒，要本宮下床！";
+                c_levi.quote = "嘖。吵死了，那個像花盆一樣的頭飾，裡面藏了多少灰塵？";
+                finalChars = [c_huafei, c_levi];
+            }
+
+            // 5. 華妃 + 甄嬛
+            else if (selectedNames.includes("華妃") && selectedNames.includes("甄嬛") && selected.length === 2) {
+                resultTitle.innerText = "後宮 Women's Talk";
+                let huaFei = finalChars.find(c => c.name === "華妃");
+                let zhenHuan = finalChars.find(c => c.name === "甄嬛");
+                huaFei.quote = "賤人就是矯情，居然敢跟本宮搶人？";
+                zhenHuan.quote = "多謝姐姐提點（微笑），今天是women's talk。";
+                huaFei.img = "https://img1.pixhost.to/images/11483/682524021__.jpg";
+                zhenHuan.img = "https://img1.pixhost.to/images/11483/682524018__.jpg";
+                finalChars = [huaFei, zhenHuan];
+            }
+
+            // 6. 劉宇寧 + BTS
+            else if (selectedNames.includes("劉宇寧") && selectedNames.includes("BTS") && selected.length === 2) {
+                resultTitle.innerText = "今夜歌舞昇平，專屬演唱會嗨到天亮！";
+                finalChars.find(c => c.name === "劉宇寧").quote = "今夜就不睡了吧，我們用歌聲陪妳到天亮！";
+                finalChars.find(c => c.name === "BTS").quote = "ARMY不睡覺，加入我們吧！";
+            }
+
+            // 7. 里維 + 任意
+            else if (selectedNames.includes("里維兵長") && selected.length > 1) {
+                if (selected.length !== characters.length) {
+                    resultTitle.innerText = "今夜大掃除，全員聽令！";
+                }
+                finalChars.find(c => c.name === "里維兵長").quote = "喂！那個誰！還沒洗澡不准上床！";
+            }
+
+            // 8. 一般多選
+            else if (selected.length > 1) {
+                 if (selected.length === characters.length) {
+                     resultTitle.innerText = "娘娘今夜恩澤大地，月亮又圓了！";
+                 } else {
+                     resultTitle.innerText = "今夜大被同眠，好生熱鬧！";
+                 }
+            } 
+            // 9. 單選
+            else {
+                const charName = finalChars[0].name;
+                resultTitle.innerText = `娘娘傳召了 ${charName}`;
+            }
+
+            // --- 渲染 ---
+            if (selected.length === characters.length) {
+                 resultTitle.innerText = "娘娘今夜恩澤大地，月亮又圓了！";
+                 const moonDiv = document.createElement('div');
+                 moonDiv.className = 'result-item';
+                 moonDiv.innerHTML = `
+                    <img src="https://img1.pixhost.to/images/11483/682524015_.jpg" class="result-img" alt="花好月圓">
+                    <div class="${quoteClass}">花好月圓人長久，左擁右抱全都有！娘娘可得小心腰啊！</div>
+                `;
+                 photoArea.appendChild(moonDiv);
+                 
+                 const leviInFull = finalChars.find(c => c.name === "里維兵長");
+                 if (leviInFull) leviInFull.quote = "喂！那個誰！還沒洗澡不准上床！";
+            } 
+            else {
+                renderCharacterList(finalChars, photoArea, quoteClass);
+            }
+
+            window.scrollTo(0,0);
+        }
+
+        function renderCharacterList(chars, container, cssClass) {
+            chars.forEach(char => {
                 const item = document.createElement('div');
                 item.className = 'result-item';
-                let quoteClass = 'quote-text';
-                if (char.name === '仁富') quoteClass += ' special-quote';
-                item.innerHTML = `<img src="${char.img}" class="result-img" alt="${char.name}"><div class="${quoteClass}">${char.name}：${char.quote}</div>`;
-                photoArea.appendChild(item);
+                item.innerHTML = `<img src="${char.img}" class="result-img" alt="${char.name}"><div class="${cssClass}">${char.name}：${char.quote}</div>`;
+                container.appendChild(item);
             });
-            window.scrollTo(0,0);
         }
 
         function resetGame() {
             selected = [];
-            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('game-wrapper').style.display = 'flex'; 
             document.getElementById('result-screen').style.display = 'none';
+
             document.getElementById('main-title').innerText = "娘娘今夜欲與誰相伴？";
             document.getElementById('main-title').style.color = "#d4af37";
+            document.getElementById('subtitle').innerText = "（請娘娘翻牌，娘娘已選擇 0 人）";
+
             renderDeck();
+            adjustGameScale();
         }
+
+        function adjustGameScale() {
+            const wrapper = document.getElementById('game-wrapper');
+            const inner = document.getElementById('game-screen-inner');
+
+            if (wrapper.style.display !== 'none') {
+                inner.style.transform = 'none';
+                
+                const wrapperHeight = wrapper.clientHeight;
+                const innerHeight = inner.scrollHeight;
+                
+                if (innerHeight > (wrapperHeight - 20)) {
+                    const scale = (wrapperHeight - 60) / innerHeight;
+                    inner.style.transform = `scale(${scale})`;
+                    inner.style.transformOrigin = 'top center';
+                } else {
+                    inner.style.transform = 'none';
+                }
+            }
+        }
+
+        window.addEventListener('load', adjustGameScale);
+        window.addEventListener('resize', adjustGameScale);
 
         renderDeck();
     </script>
