@@ -9,11 +9,11 @@
 
 It was created to commemorate the happy times we worked and played together in Siaogang. I hope this little gift brings a smile to your face!
 
-這是一個專為Joy製作的網頁小遊戲，紀念我們在小港一起工作與遊玩的快樂時光。
+這是一個專為Joy製作的網頁小遊戲，紀念我們在小港一起工作與玩樂的快樂時光。
 
 遊戲特色 (Features)
 **Mobile First**: 專為手機介面設計，體驗最佳。
-**3D Flip Effect**: 精緻的 3D 翻牌動畫。
+**3D Flip Effect**: 精緻的3D翻牌動畫。
 **Easter Eggs**: 隱藏了多種人物組合彩蛋（例如：華妃+甄嬛、BTS+劉宇寧），試著找出所有組合吧！
 **Responsive Design**: 支援各種螢幕尺寸。
 
